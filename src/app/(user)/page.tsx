@@ -1,10 +1,15 @@
-export default function Home() {
+import { Hero } from '@/components/landing/hero'
+import { Features } from '@/components/landing/features'
+import { Pricing } from '@/components/landing/pricing'
+import { CTA } from '@/components/landing/cta'
+
+export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold">WooshCard</h1>
-      <p className="mt-4 text-muted-foreground">
-        Virtual Credit Card Issuance Platform
-      </p>
-    </main>
-  );
+    <div>
+      <Hero />
+      <Features />
+      <Pricing />
+      <CTA />
+    </div>
+  )
 }
