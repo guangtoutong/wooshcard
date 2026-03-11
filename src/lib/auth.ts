@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
+  session: {
+    strategy: 'jwt',
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -12,12 +15,20 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      if (session.user) {
+    async jwt({ token, user }) {
+      if (user) {
         const dbUser = await prisma.user.findUnique({ where: { id: user.id } })
-        session.user.id = user.id
-        session.user.role = dbUser?.role || 'USER'
-        session.user.locale = dbUser?.locale || 'en'
+        token.role = dbUser?.role || 'USER'
+        token.id = user.id
+        token.locale = dbUser?.locale || 'en'
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string
+        session.user.role = token.role as string
+        session.user.locale = (token.locale as string) || 'en'
       }
       return session
     },
