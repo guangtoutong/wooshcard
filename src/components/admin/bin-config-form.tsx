@@ -29,6 +29,12 @@ interface BinConfig {
   openFee: number
   customLastFourFee: number
   description: string
+  defaultBillingStreet: string
+  defaultBillingCity: string
+  defaultBillingState: string
+  defaultBillingZip: string
+  defaultBillingCountry: string
+  rechargeFeeRate: number
   isActive: boolean
 }
 
@@ -47,6 +53,12 @@ export function BinConfigForm({ open, onOpenChange, config, onSaved }: BinConfig
   const [openFee, setOpenFee] = useState(String(config?.openFee ?? '5'))
   const [customLastFourFee, setCustomLastFourFee] = useState(String(config?.customLastFourFee ?? '10'))
   const [description, setDescription] = useState(config?.description || '')
+  const [defaultBillingStreet, setDefaultBillingStreet] = useState(config?.defaultBillingStreet || '')
+  const [defaultBillingCity, setDefaultBillingCity] = useState(config?.defaultBillingCity || '')
+  const [defaultBillingState, setDefaultBillingState] = useState(config?.defaultBillingState || '')
+  const [defaultBillingZip, setDefaultBillingZip] = useState(config?.defaultBillingZip || '')
+  const [defaultBillingCountry, setDefaultBillingCountry] = useState(config?.defaultBillingCountry || 'US')
+  const [rechargeFeeRate, setRechargeFeeRate] = useState(String((config?.rechargeFeeRate ?? 0.03) * 100))
   const [isActive, setIsActive] = useState(config?.isActive ?? true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -66,6 +78,12 @@ export function BinConfigForm({ open, onOpenChange, config, onSaved }: BinConfig
         openFee: parseFloat(openFee),
         customLastFourFee: parseFloat(customLastFourFee),
         description,
+        defaultBillingStreet,
+        defaultBillingCity,
+        defaultBillingState,
+        defaultBillingZip,
+        defaultBillingCountry,
+        rechargeFeeRate: parseFloat(rechargeFeeRate) / 100,
         isActive,
       }
 
@@ -174,6 +192,54 @@ export function BinConfigForm({ open, onOpenChange, config, onSaved }: BinConfig
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional description"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Recharge Fee Rate (%)</Label>
+            <Input
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              value={rechargeFeeRate}
+              onChange={(e) => setRechargeFeeRate(e.target.value)}
+              placeholder="3"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm font-semibold">Default Billing Address</Label>
+            <div className="space-y-2">
+              <Input
+                value={defaultBillingStreet}
+                onChange={(e) => setDefaultBillingStreet(e.target.value)}
+                placeholder="Street Address"
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  value={defaultBillingCity}
+                  onChange={(e) => setDefaultBillingCity(e.target.value)}
+                  placeholder="City"
+                />
+                <Input
+                  value={defaultBillingState}
+                  onChange={(e) => setDefaultBillingState(e.target.value)}
+                  placeholder="State"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Input
+                  value={defaultBillingZip}
+                  onChange={(e) => setDefaultBillingZip(e.target.value)}
+                  placeholder="ZIP Code"
+                />
+                <Input
+                  value={defaultBillingCountry}
+                  onChange={(e) => setDefaultBillingCountry(e.target.value)}
+                  placeholder="Country"
+                />
+              </div>
+            </div>
           </div>
 
           {isEdit && (

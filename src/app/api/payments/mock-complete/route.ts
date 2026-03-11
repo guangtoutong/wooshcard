@@ -52,6 +52,11 @@ export async function POST(request: Request) {
           bin: binConfig.bin,
           ...cardData,
           customLastFour: !!customLastFour,
+          billingStreet: binConfig.defaultBillingStreet,
+          billingCity: binConfig.defaultBillingCity,
+          billingState: binConfig.defaultBillingState,
+          billingZip: binConfig.defaultBillingZip,
+          billingCountry: binConfig.defaultBillingCountry,
         },
       }),
       prisma.transaction.update({
@@ -64,10 +69,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No card ID for recharge' }, { status: 500 })
     }
 
+    // Parse base amount from description (fee is included in transaction.amount)
+    const rechargeMatch = transaction.description.match(/Recharge \$([0-9.]+)/)
+    const baseAmount = rechargeMatch ? parseFloat(rechargeMatch[1]) : Number(transaction.amount)
+
     await prisma.$transaction([
       prisma.card.update({
         where: { id: transaction.cardId },
-        data: { balance: { increment: Number(transaction.amount) } },
+        data: { balance: { increment: baseAmount } },
       }),
       prisma.transaction.update({
         where: { id: transaction.id },

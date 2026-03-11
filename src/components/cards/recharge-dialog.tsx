@@ -31,10 +31,16 @@ export function RechargeDialog({
   const router = useRouter()
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
+  const [feeInfo, setFeeInfo] = useState<{ fee: number; feeRate: number; total: number } | null>(null)
+
+  const numAmount = parseFloat(amount || '0')
+
+  // Calculate fee preview when amount changes (use default 3% for display)
+  const previewFee = Math.round(numAmount * 0.03 * 100) / 100
+  const previewTotal = Math.round((numAmount + previewFee) * 100) / 100
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const numAmount = parseFloat(amount)
     if (!numAmount || numAmount < 1) return
 
     setLoading(true)
@@ -47,7 +53,9 @@ export function RechargeDialog({
       })
       if (!rechargeRes.ok) return
 
-      const { transactionId } = await rechargeRes.json()
+      const rechargeData = await rechargeRes.json()
+      const { transactionId } = rechargeData
+      setFeeInfo({ fee: rechargeData.fee, feeRate: rechargeData.feeRate, total: rechargeData.total })
 
       // Step 2: Create payment session
       const paymentRes = await fetch('/api/payments/create', {
@@ -92,8 +100,25 @@ export function RechargeDialog({
             <p className="text-xs text-muted-foreground">{t('minAmount')}</p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading || !amount || parseFloat(amount) < 1}>
-            {loading ? '...' : `Pay with WooshPay - $${parseFloat(amount || '0').toFixed(2)}`}
+          {numAmount >= 1 && (
+            <div className="rounded-md bg-muted/50 p-3 space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span>{t('rechargeAmount')}</span>
+                <span>${numAmount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>{t('serviceFee')} (3%)</span>
+                <span>${previewFee.toFixed(2)}</span>
+              </div>
+              <div className="border-t border-border pt-1 flex justify-between font-semibold">
+                <span>{t('totalPayment')}</span>
+                <span>${previewTotal.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+
+          <Button type="submit" className="w-full" disabled={loading || !amount || numAmount < 1}>
+            {loading ? '...' : `Pay with WooshPay - $${previewTotal.toFixed(2)}`}
           </Button>
         </form>
       </DialogContent>

@@ -29,6 +29,12 @@ export async function PATCH(
   if (body.openFee !== undefined) data.openFee = body.openFee
   if (body.customLastFourFee !== undefined) data.customLastFourFee = body.customLastFourFee
   if (body.description !== undefined) data.description = body.description
+  if (body.defaultBillingStreet !== undefined) data.defaultBillingStreet = body.defaultBillingStreet
+  if (body.defaultBillingCity !== undefined) data.defaultBillingCity = body.defaultBillingCity
+  if (body.defaultBillingState !== undefined) data.defaultBillingState = body.defaultBillingState
+  if (body.defaultBillingZip !== undefined) data.defaultBillingZip = body.defaultBillingZip
+  if (body.defaultBillingCountry !== undefined) data.defaultBillingCountry = body.defaultBillingCountry
+  if (body.rechargeFeeRate !== undefined) data.rechargeFeeRate = body.rechargeFeeRate
   if (body.isActive !== undefined) data.isActive = body.isActive
 
   const updated = await prisma.cardBinConfig.update({ where: { id }, data })
@@ -37,6 +43,7 @@ export async function PATCH(
     ...updated,
     openFee: Number(updated.openFee),
     customLastFourFee: Number(updated.customLastFourFee),
+    rechargeFeeRate: Number(updated.rechargeFeeRate),
   })
 }
 

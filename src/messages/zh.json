@@ -76,7 +76,18 @@
     "claude": "Claude",
     "active": "正常",
     "frozen": "已冻结",
-    "cancelled": "已注销"
+    "cancelled": "已注销",
+    "billingAddress": "账单地址",
+    "street": "街道地址",
+    "city": "城市",
+    "state": "州/省",
+    "zip": "邮政编码",
+    "country": "国家",
+    "editAddress": "编辑地址",
+    "addressSaved": "地址已保存",
+    "serviceFee": "服务费",
+    "feeRate": "费率",
+    "totalPayment": "支付总额"
   },
   "transactions": {
     "title": "交易记录",

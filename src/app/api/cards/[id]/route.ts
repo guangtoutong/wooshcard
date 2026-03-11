@@ -40,9 +40,26 @@ export async function PATCH(
   if (card.userId !== user.id) return unauthorized()
 
   const body = await request.json()
-  const { status } = body
+  const { status, billingStreet, billingCity, billingState, billingZip, billingCountry } = body
 
-  if (!['ACTIVE', 'FROZEN'].includes(status)) {
+  // If updating billing address
+  const billingFields: Record<string, string> = {}
+  if (billingStreet !== undefined) billingFields.billingStreet = billingStreet
+  if (billingCity !== undefined) billingFields.billingCity = billingCity
+  if (billingState !== undefined) billingFields.billingState = billingState
+  if (billingZip !== undefined) billingFields.billingZip = billingZip
+  if (billingCountry !== undefined) billingFields.billingCountry = billingCountry
+
+  if (Object.keys(billingFields).length > 0) {
+    const updatedCard = await prisma.card.update({
+      where: { id: params.id },
+      data: billingFields,
+    })
+    return NextResponse.json(updatedCard)
+  }
+
+  // If updating status
+  if (!status || !['ACTIVE', 'FROZEN'].includes(status)) {
     return badRequest('Status must be ACTIVE or FROZEN')
   }
 

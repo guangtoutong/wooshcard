@@ -6,7 +6,9 @@ import { toast } from 'sonner'
 import { VirtualCard } from '@/components/ui/virtual-card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Eye, EyeOff, Copy, Snowflake, Sun } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Eye, EyeOff, Copy, Snowflake, Sun, Pencil } from 'lucide-react'
 import { RechargeDialog } from './recharge-dialog'
 
 interface CardData {
@@ -20,6 +22,11 @@ interface CardData {
   expYear: number
   status: string
   balance: number
+  billingStreet: string
+  billingCity: string
+  billingState: string
+  billingZip: string
+  billingCountry: string
 }
 
 interface CardDetailViewProps {
@@ -28,11 +35,19 @@ interface CardDetailViewProps {
 
 export function CardDetailView({ card: initialCard }: CardDetailViewProps) {
   const t = useTranslations('cards')
+  const tCommon = useTranslations('common')
   const [card, setCard] = useState(initialCard)
   const [showNumber, setShowNumber] = useState(false)
   const [showCvv, setShowCvv] = useState(false)
   const [rechargeOpen, setRechargeOpen] = useState(false)
   const [freezeLoading, setFreezeLoading] = useState(false)
+  const [editingAddress, setEditingAddress] = useState(false)
+  const [addressSaving, setAddressSaving] = useState(false)
+  const [billingStreet, setBillingStreet] = useState(initialCard.billingStreet || '')
+  const [billingCity, setBillingCity] = useState(initialCard.billingCity || '')
+  const [billingState, setBillingState] = useState(initialCard.billingState || '')
+  const [billingZip, setBillingZip] = useState(initialCard.billingZip || '')
+  const [billingCountry, setBillingCountry] = useState(initialCard.billingCountry || 'US')
 
   const isFrozen = card.status === 'FROZEN'
 
@@ -56,6 +71,25 @@ export function CardDetailView({ card: initialCard }: CardDetailViewProps) {
       }
     } finally {
       setFreezeLoading(false)
+    }
+  }
+
+  const handleSaveAddress = async () => {
+    setAddressSaving(true)
+    try {
+      const res = await fetch(`/api/cards/${card.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ billingStreet, billingCity, billingState, billingZip, billingCountry }),
+      })
+      if (res.ok) {
+        const updated = await res.json()
+        setCard((prev) => ({ ...prev, billingStreet: updated.billingStreet, billingCity: updated.billingCity, billingState: updated.billingState, billingZip: updated.billingZip, billingCountry: updated.billingCountry }))
+        setEditingAddress(false)
+        toast.success(t('addressSaved'))
+      }
+    } finally {
+      setAddressSaving(false)
     }
   }
 
@@ -138,6 +172,60 @@ export function CardDetailView({ card: initialCard }: CardDetailViewProps) {
             {isFrozen ? t('frozen') : t('active')}
           </Badge>
         </div>
+      </div>
+
+      {/* Billing Address */}
+      <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold uppercase text-muted-foreground">{t('billingAddress')}</p>
+          <Button variant="ghost" size="icon" onClick={() => setEditingAddress(!editingAddress)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+        </div>
+        {editingAddress ? (
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs">{t('street')}</Label>
+              <Input value={billingStreet} onChange={(e) => setBillingStreet(e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">{t('city')}</Label>
+                <Input value={billingCity} onChange={(e) => setBillingCity(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{t('state')}</Label>
+                <Input value={billingState} onChange={(e) => setBillingState(e.target.value)} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">{t('zip')}</Label>
+                <Input value={billingZip} onChange={(e) => setBillingZip(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">{t('country')}</Label>
+                <Input value={billingCountry} onChange={(e) => setBillingCountry(e.target.value)} />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button size="sm" onClick={handleSaveAddress} disabled={addressSaving}>
+                {addressSaving ? '...' : t('editAddress')}
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setEditingAddress(false)}>
+                {tCommon('cancel')}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-sm text-foreground">
+            {card.billingStreet && <p>{card.billingStreet}</p>}
+            <p>
+              {[card.billingCity, card.billingState, card.billingZip].filter(Boolean).join(', ')}
+            </p>
+            {card.billingCountry && <p>{card.billingCountry}</p>}
+          </div>
+        )}
       </div>
 
       {/* Actions */}

@@ -76,7 +76,18 @@
     "claude": "Claude",
     "active": "Active",
     "frozen": "Frozen",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "billingAddress": "Billing Address",
+    "street": "Street Address",
+    "city": "City",
+    "state": "State/Province",
+    "zip": "ZIP/Postal Code",
+    "country": "Country",
+    "editAddress": "Edit Address",
+    "addressSaved": "Address saved",
+    "serviceFee": "Service Fee",
+    "feeRate": "Fee Rate",
+    "totalPayment": "Total Payment"
   },
   "transactions": {
     "title": "Transaction History",

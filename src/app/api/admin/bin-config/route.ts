@@ -15,6 +15,7 @@ export async function GET() {
       ...c,
       openFee: Number(c.openFee),
       customLastFourFee: Number(c.customLastFourFee),
+      rechargeFeeRate: Number(c.rechargeFeeRate),
     })),
   })
 }
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
   if (error) return error
 
   const body = await request.json()
-  const { network, scenario, bin, openFee, customLastFourFee, description } = body
+  const { network, scenario, bin, openFee, customLastFourFee, description, defaultBillingStreet, defaultBillingCity, defaultBillingState, defaultBillingZip, defaultBillingCountry, rechargeFeeRate } = body
 
   if (!network || !scenario || !bin) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -58,6 +59,12 @@ export async function POST(request: NextRequest) {
       openFee: openFee ?? 5,
       customLastFourFee: customLastFourFee ?? 10,
       description: description || '',
+      defaultBillingStreet: defaultBillingStreet || '',
+      defaultBillingCity: defaultBillingCity || '',
+      defaultBillingState: defaultBillingState || '',
+      defaultBillingZip: defaultBillingZip || '',
+      defaultBillingCountry: defaultBillingCountry || 'US',
+      rechargeFeeRate: rechargeFeeRate ?? 0.03,
     },
   })
 
@@ -65,5 +72,6 @@ export async function POST(request: NextRequest) {
     ...config,
     openFee: Number(config.openFee),
     customLastFourFee: Number(config.customLastFourFee),
+    rechargeFeeRate: Number(config.rechargeFeeRate),
   }, { status: 201 })
 }

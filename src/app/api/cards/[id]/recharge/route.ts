@@ -27,14 +27,24 @@ export async function POST(
     return badRequest('Amount must be a positive number')
   }
 
-  // Create pending recharge transaction
+  // Look up BIN config for fee rate
+  const binConfig = await prisma.cardBinConfig.findFirst({
+    where: { network: card.network, scenario: card.scenario },
+  })
+
+  const feeRate = binConfig ? Number(binConfig.rechargeFeeRate) : 0.03
+  const fee = Math.round(amount * feeRate * 100) / 100
+  const total = Math.round((amount + fee) * 100) / 100
+
+  // Create pending recharge transaction with total amount
+  // Description encodes the base amount for later extraction
   const transaction = await prisma.transaction.create({
     data: {
       userId: user.id,
       cardId: card.id,
       type: 'RECHARGE',
-      amount,
-      description: `Recharge card ending in ${card.lastFour}`,
+      amount: total,
+      description: `Recharge $${amount.toFixed(2)} to card ending in ${card.lastFour} (fee: $${fee.toFixed(2)})`,
       status: 'PENDING',
     },
   })
@@ -42,6 +52,9 @@ export async function POST(
   return NextResponse.json({
     transactionId: transaction.id,
     amount,
+    fee,
+    feeRate,
+    total,
     cardId: card.id,
   })
 }

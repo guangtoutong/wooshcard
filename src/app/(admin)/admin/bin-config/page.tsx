@@ -29,6 +29,12 @@ interface BinConfig {
   openFee: number
   customLastFourFee: number
   description: string
+  defaultBillingStreet: string
+  defaultBillingCity: string
+  defaultBillingState: string
+  defaultBillingZip: string
+  defaultBillingCountry: string
+  rechargeFeeRate: number
   isActive: boolean
   createdAt: string
 }
@@ -95,6 +101,8 @@ export default function AdminBinConfigPage() {
               <TableHead>{t('bin')}</TableHead>
               <TableHead>{t('openFee')}</TableHead>
               <TableHead>{t('customFee')}</TableHead>
+              <TableHead>Country</TableHead>
+              <TableHead>Fee %</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-12" />
             </TableRow>
@@ -102,13 +110,13 @@ export default function AdminBinConfigPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : configs.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No configurations found
                 </TableCell>
               </TableRow>
@@ -120,6 +128,8 @@ export default function AdminBinConfigPage() {
                   <TableCell className="font-mono">{config.bin}</TableCell>
                   <TableCell>${config.openFee.toFixed(2)}</TableCell>
                   <TableCell>${config.customLastFourFee.toFixed(2)}</TableCell>
+                  <TableCell>{config.defaultBillingCountry || 'US'}</TableCell>
+                  <TableCell>{((config.rechargeFeeRate || 0.03) * 100).toFixed(1)}%</TableCell>
                   <TableCell>
                     <Badge variant={config.isActive ? 'default' : 'secondary'}>
                       {config.isActive ? t('active') : t('inactive')}
