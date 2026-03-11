@@ -64,7 +64,7 @@ export function VirtualCard({ card }: VirtualCardProps) {
 
   return (
     <motion.div
-      className="relative w-full cursor-pointer"
+      className="relative w-full max-w-sm mx-auto md:max-w-none cursor-pointer"
       style={{
         aspectRatio: '1.586',
         perspective: '1000px',

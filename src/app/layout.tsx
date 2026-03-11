@@ -17,8 +17,9 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "WooshCard - Virtual Credit Card Platform",
-  description: "Issue and manage virtual credit cards with WooshPay integration",
+  title: 'WooshCard - Key to the AI Era',
+  description: 'Your gateway to seamless AI subscriptions. Get virtual cards tailored for ChatGPT, Claude, Amazon and more.',
+  keywords: ['virtual card', 'AI subscription', 'ChatGPT', 'Claude', 'Amazon', 'WooshPay'],
 };
 
 export default async function RootLayout({
