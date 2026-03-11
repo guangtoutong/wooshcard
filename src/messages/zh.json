@@ -15,7 +15,9 @@
     "next": "下一步",
     "submit": "提交",
     "search": "搜索",
-    "noData": "暂无数据"
+    "noData": "暂无数据",
+    "myCards": "我的卡片",
+    "transactions": "交易记录"
   },
   "landing": {
     "heroTitle": "通往AI时代的钥匙",

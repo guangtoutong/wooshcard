@@ -15,7 +15,9 @@
     "next": "Next",
     "submit": "Submit",
     "search": "Search",
-    "noData": "No data available"
+    "noData": "No data available",
+    "myCards": "My Cards",
+    "transactions": "Transactions"
   },
   "landing": {
     "heroTitle": "Key to the AI Era",
