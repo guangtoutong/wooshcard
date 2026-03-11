@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum CardNetwork {
+  VISA
+  MASTERCARD
+}
+
+enum CardScenario {
+  AMAZON
+  CHATGPT
+  CLAUDE
+}
+
+enum CardStatus {
+  ACTIVE
+  FROZEN
+  CANCELLED
+}
+
+enum TransactionType {
+  CARD_OPEN
+  CUSTOM_LAST_FOUR
+  RECHARGE
+  CONSUMPTION
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(USER)
+  locale        String    @default("en")
+  balance       Decimal   @default(0) @db.Decimal(10, 2)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  cards         Card[]
+  transactions  Transaction[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Card {
+  id             String       @id @default(cuid())
+  userId         String
+  network        CardNetwork
+  scenario       CardScenario
+  bin            String
+  cardNumber     String       @unique
+  lastFour       String
+  customLastFour Boolean      @default(false)
+  cvv            String
+  expMonth       Int
+  expYear        Int
+  balance        Decimal      @default(0) @db.Decimal(10, 2)
+  status         CardStatus   @default(ACTIVE)
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+
+  @@index([userId])
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  userId          String
+  cardId          String?
+  type            TransactionType
+  amount          Decimal           @db.Decimal(10, 2)
+  description     String
+  status          TransactionStatus @default(PENDING)
+  wooshpayOrderId String?
+  createdAt       DateTime          @default(now())
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card            Card?             @relation(fields: [cardId], references: [id])
+
+  @@index([userId])
+  @@index([cardId])
+}
+
+model CardBinConfig {
+  id                String       @id @default(cuid())
+  network           CardNetwork
+  scenario          CardScenario
+  bin               String
+  openFee           Decimal      @default(5) @db.Decimal(10, 2)
+  customLastFourFee Decimal      @default(10) @db.Decimal(10, 2)
+  description       String       @default("")
+  isActive          Boolean      @default(true)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  @@unique([network, scenario])
+}
